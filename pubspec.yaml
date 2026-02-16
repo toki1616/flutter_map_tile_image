@@ -92,7 +92,12 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
   assets:
-    - assets/images/tiles/6/54/
+    - assets/images/tiles/4/13/ #
+    - assets/images/tiles/4/14/
+    - assets/images/tiles/5/27/ #
+    - assets/images/tiles/5/28/
+    - assets/images/tiles/5/29/
+    - assets/images/tiles/6/54/ #
     - assets/images/tiles/6/55/
     - assets/images/tiles/6/56/
     - assets/images/tiles/6/57/
