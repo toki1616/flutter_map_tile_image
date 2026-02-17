@@ -23,6 +23,8 @@ final loadLineProvider = Provider((ref) {
   return LoadLine(ref.read(mapRepositoryProvider));
 });
 
+final modeWindowVisibleProvider = StateProvider<bool>((ref) => false);
+
 // Controller
 final mapControllerProvider =
 StateNotifierProvider<MapController, MapState>((ref) {

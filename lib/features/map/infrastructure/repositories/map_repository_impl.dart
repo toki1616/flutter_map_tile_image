@@ -1,5 +1,4 @@
 import '../../domain/entities/map_line.dart';
-import '../../domain/entities/map_pin.dart';
 import '../../domain/repositories/map_repository.dart';
 import '../datasources/map_local_datasource.dart';
 
