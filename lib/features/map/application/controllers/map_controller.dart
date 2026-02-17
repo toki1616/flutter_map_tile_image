@@ -34,7 +34,15 @@ class MapController extends StateNotifier<MapState> {
   void toggleLineMode() {
     state = state.copyWith(
       isLineMode: !state.isLineMode,
+      isPolygonMode: false,
       linePoints: [],
+    );
+  }
+
+  void togglePolygonMode() {
+    state = state.copyWith(
+      isPolygonMode: !state.isPolygonMode,
+      isLineMode: false, // ラインモードはオフ
     );
   }
 

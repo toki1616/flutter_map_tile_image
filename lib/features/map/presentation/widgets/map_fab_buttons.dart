@@ -14,14 +14,21 @@ class MapFabButtons extends ConsumerWidget {
     final mapCtrl = ref.read(mapControllerProvider.notifier);
     final modeWindowCtrl = ref.read(modeWindowVisibleProvider.notifier);
 
+    // FAB の色をモードに応じて切り替える
+    Color? _lineButtonColor() {
+      if (mapState.isLineMode) return Colors.orange;   // ラインモード
+      if (mapState.isPolygonMode) return Colors.green; // ポリゴンモード
+      return null;                              // 通常
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
+        // ライン / ポリゴン モード選択ウィンドウを開くボタン
         FloatingActionButton(
           heroTag: "lineMode",
-          backgroundColor:
-          mapState.isLineMode ? Colors.orange : Colors.grey,
+          backgroundColor: _lineButtonColor(),
           child: const Icon(Icons.timeline),
           onPressed: () {
             modeWindowCtrl.state = !modeWindowCtrl.state;
@@ -29,6 +36,7 @@ class MapFabButtons extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
 
+        // ライン保存
         FloatingActionButton(
           heroTag: "saveLine",
           child: const Icon(Icons.save),
@@ -41,6 +49,7 @@ class MapFabButtons extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
 
+        // ズームイン
         FloatingActionButton(
           heroTag: "zoomIn",
           child: const Icon(Icons.add),
@@ -53,6 +62,7 @@ class MapFabButtons extends ConsumerWidget {
         ),
         const SizedBox(height: 10),
 
+        // ズームアウト
         FloatingActionButton(
           heroTag: "zoomOut",
           child: const Icon(Icons.remove),

@@ -45,7 +45,7 @@ class ModeSelectWindow extends ConsumerWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // TODO: ポリゴンモード
+                      mapCtrl.togglePolygonMode();
                       modeWindowCtrl.state = false;
                     },
                     child: const Text("ポリゴン"),
