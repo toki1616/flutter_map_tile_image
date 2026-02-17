@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'features/map/presentation/map_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(   // Riverpod の DI コンテナ
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 
-class MapScreen extends StatefulWidget {
+import '../application/providers/map_providers.dart';
+
+class MapScreen extends ConsumerWidget {
   const MapScreen({super.key});
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mapState = ref.watch(mapControllerProvider);
+    final mapCtrl = ref.read(mapControllerProvider.notifier);
 
-class _MapScreenState extends State<MapScreen> {
-  final MapController _mapController = MapController();
-  double _zoom = 6;
+    final mapController = MapController();
 
-  LatLng _center = const LatLng(35.681236, 139.767125);
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("ローカルタイルマップ"),
@@ -24,23 +21,41 @@ class _MapScreenState extends State<MapScreen> {
       body: Stack(
         children: [
           FlutterMap(
-            mapController: _mapController,
+            mapController: mapController,
             options: MapOptions(
-              center: _center,
-              zoom: _zoom,
+              center: mapState.center,
+              zoom: mapState.zoom,
               maxZoom: 18,
               minZoom: 3,
+
+              // ★ ラインモードのときだけポイント追加
+              onTap: (tapPos, latlng) {
+                if (mapState.isLineMode) {
+                  mapCtrl.addLinePoint(latlng);
+                }
+              },
+
+              // ★ 中心・ズーム変更を Riverpod に反映
               onPositionChanged: (pos, _) {
-                setState(() {
-                  _zoom = pos.zoom!;
-                  _center = pos.center!;
-                });
+                mapCtrl.updateCenter(pos.center!);
+                mapCtrl.updateZoom(pos.zoom!);
               },
             ),
             children: [
               TileLayer(
                 tileProvider: AssetTileProvider(),
                 urlTemplate: "assets/images/tiles/{z}/{x}/{y}.png",
+              ),
+
+              // ★ ライン描画
+              PolylineLayer(
+                polylines: [
+                  Polyline(
+                    points: mapState.linePoints,
+                    strokeWidth: 4,
+                    color: Colors.blue,
+                  ),
+                ],
               ),
             ],
           ),
@@ -66,7 +81,8 @@ class _MapScreenState extends State<MapScreen> {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                "Lat: ${_center.latitude.toStringAsFixed(6)}\nLng: ${_center.longitude.toStringAsFixed(6)}",
+                "Lat: ${mapState.center.latitude.toStringAsFixed(6)}\n"
+                    "Lng: ${mapState.center.longitude.toStringAsFixed(6)}",
                 style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
             ),
@@ -82,33 +98,55 @@ class _MapScreenState extends State<MapScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    //Zoom In
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _btn(Icons.add, () {
-                          _mapController.move(
-                            _mapController.camera.center,
-                            _zoom + 1,
-                          );
-                        }),
-                      ],
+                    // ★ ラインモード切替ボタン
+                    FloatingActionButton(
+                      heroTag: "lineMode",
+                      backgroundColor:
+                      mapState.isLineMode ? Colors.orange : Colors.grey,
+                      child: const Icon(Icons.timeline),
+                      onPressed: () {
+                        mapCtrl.toggleLineMode();
+                      },
+                    ),
+                    const SizedBox(height: 12),
+
+                    // ★ 保存ボタン
+                    FloatingActionButton(
+                      heroTag: "saveLine",
+                      child: const Icon(Icons.save),
+                      onPressed: () async {
+                        await mapCtrl.saveCurrentLine();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("ラインを保存しました")),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+
+                    // 既存のズームイン
+                    FloatingActionButton(
+                      heroTag: "zoomIn",
+                      child: const Icon(Icons.add),
+                      onPressed: () {
+                        mapController.move(
+                          mapState.center,
+                          mapState.zoom + 1,
+                        );
+                      },
                     ),
                     const SizedBox(height: 10),
 
-                    //Zoom Out
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _btn(Icons.remove, () {
-                          _mapController.move(
-                            _mapController.camera.center,
-                            _zoom - 1,
-                          );
-                        }),
-                      ],
+                    // 既存のズームアウト
+                    FloatingActionButton(
+                      heroTag: "zoomOut",
+                      child: const Icon(Icons.remove),
+                      onPressed: () {
+                        mapController.move(
+                          mapState.center,
+                          mapState.zoom - 1,
+                        );
+                      },
                     ),
-                    const SizedBox(height: 10),
                   ],
                 ),
               ),
@@ -116,16 +154,6 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  // 共通の小ボタン
-  Widget _btn(IconData icon, VoidCallback onPressed) {
-    return FloatingActionButton(
-      heroTag: UniqueKey(),
-      mini: false,
-      onPressed: onPressed,
-      child: Icon(icon),
     );
   }
 }
@@ -140,19 +168,8 @@ class CrosshairPainter extends CustomPainter {
 
     final center = Offset(size.width / 2, size.height / 2);
 
-    // 横線
-    canvas.drawLine(
-      Offset(0, center.dy),
-      Offset(size.width, center.dy),
-      paint,
-    );
-
-    // 縦線
-    canvas.drawLine(
-      Offset(center.dx, 0),
-      Offset(center.dx, size.height),
-      paint,
-    );
+    canvas.drawLine(Offset(0, center.dy), Offset(size.width, center.dy), paint);
+    canvas.drawLine(Offset(center.dx, 0), Offset(center.dx, size.height), paint);
   }
 
   @override
