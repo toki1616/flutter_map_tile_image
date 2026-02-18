@@ -9,19 +9,23 @@ class CoordinateDisplay extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mapState = ref.watch(mapControllerProvider);
 
-    return Positioned(
-      right: 10,
-      top: 10,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Text(
-          "Lat: ${mapState.center.latitude.toStringAsFixed(6)}\n"
-              "Lng: ${mapState.center.longitude.toStringAsFixed(6)}",
-          style: const TextStyle(color: Colors.white, fontSize: 14),
+    return SafeArea(
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 10, top: 10),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              "Lat: ${mapState.center.latitude.toStringAsFixed(6)}\n"
+                  "Lng: ${mapState.center.longitude.toStringAsFixed(6)}",
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ),
         ),
       ),
     );
