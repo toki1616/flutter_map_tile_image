@@ -15,6 +15,7 @@ class LineFileEditorWindow extends ConsumerWidget {
     final mapCtrl = ref.read(mapControllerProvider.notifier);
     final editorCtrl = ref.read(editorWindowProvider.notifier);
 
+    final selected = mapState.selectedAttributeIndex;
     final editingLine = mapState.editingLine;
     if (editingLine == null) return const SizedBox.shrink();
 
@@ -120,10 +121,8 @@ class LineFileEditorWindow extends ConsumerWidget {
                   final attr = editingLine.attributes[index];
                   return ListTile(
                     title: Text(attr.title),
-                    onTap: () {
-                      mapCtrl.startEditingAttribute(index);
-                      editorCtrl.state = EditorWindowType.lineAttributeEditor;
-                    },
+                    selected: selected == index,
+                    onTap: () => mapCtrl.selectAttribute(index),
                   );
                 },
               ),
@@ -140,7 +139,21 @@ class LineFileEditorWindow extends ConsumerWidget {
                     child: const Text("ライン追加"),
                   ),
                   ElevatedButton(
-                    onPressed: mapCtrl.deleteEditingAttribute,
+                    onPressed: selected == null
+                        ? null
+                        : () {
+                      mapCtrl.startEditingAttribute(selected);
+                      editorCtrl.state =
+                          EditorWindowType.lineAttributeEditor;
+                    },
+                    child: const Text("ライン編集"),
+                  ),
+                  ElevatedButton(
+                    onPressed: selected == null
+                        ? null
+                        : () {
+                      mapCtrl.deleteAttribute(selected);
+                    },
                     child: const Text("ライン削除"),
                   ),
                 ],
