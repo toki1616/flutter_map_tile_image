@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:developer';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -9,13 +10,10 @@ class SaveUtils {
     Directory baseDir;
 
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      // PC：exe と同じ階層
-      final exePath = Platform.resolvedExecutable; // exe のフルパス
+      final exePath = Platform.resolvedExecutable;
       final exeDir = Directory(p.dirname(exePath));
-
       baseDir = Directory(p.join(exeDir.path, "SaveData"));
     } else {
-      // スマホ：安全な領域
       final appDir = await getApplicationDocumentsDirectory();
       baseDir = Directory(p.join(appDir.path, "SaveData"));
     }
@@ -33,25 +31,105 @@ class SaveUtils {
     return p.join(folder.path, "$fileName.json");
   }
 
-  /// JSON 保存
-  static Future<void> save(String fileName, Map<String, dynamic> data) async {
+  /// JSON に変換して保存する
+  /// JSON に変換して保存する
+  static Future<void> save(String fileName, dynamic data) async {
     final path = await _getPath(fileName);
     final file = File(path);
 
-    final jsonStr = const JsonEncoder.withIndent("  ").convert(data);
-    await file.writeAsString(jsonStr);
+    log("💾 SaveUtils.save() 開始: fileName=$fileName");
+    log("📂 保存先パス: $path");
+
+    try {
+      final jsonReady = _convertToJson(data);
+      log("📄 保存する JSON オブジェクト: $jsonReady");
+
+      final jsonStr = const JsonEncoder.withIndent("  ").convert(jsonReady);
+      log("📝 JSON 文字列:\n$jsonStr");
+
+      await file.writeAsString(jsonStr);
+
+      log("✅ 保存完了: $fileName");
+
+    } catch (e, stack) {
+      log("❌ SaveUtils.save() でエラー発生: $e");
+      log("📌 STACK TRACE:\n$stack");
+
+      // 必要なら例外を再スローして上位に通知
+      // throw e;
+    }
   }
 
   /// JSON 読み込み
-  static Future<Map<String, dynamic>?> load(String fileName) async {
+  /// JSON 読み込み
+  static Future<dynamic> load(String fileName) async {
     final path = await _getPath(fileName);
     final file = File(path);
 
-    if (!await file.exists()) {
+    log("📥 SaveUtils.load() 開始: fileName=$fileName");
+    log("📂 読み込みパス: $path");
+
+    try {
+      if (!await file.exists()) {
+        log("⚠️ ファイルが存在しません: $path");
+        return null;
+      }
+
+      final jsonStr = await file.readAsString();
+      log("📄 読み込んだ JSON 文字列:\n$jsonStr");
+
+      final decoded = jsonDecode(jsonStr);
+      log("📌 デコード結果: $decoded");
+
+      log("✅ 読み込み完了: $fileName");
+      return decoded;
+
+    } catch (e, stack) {
+      log("❌ SaveUtils.load() でエラー発生: $e");
+      log("📌 STACK TRACE:\n$stack");
+
+      // 必要なら上位に例外を投げる
+      // throw e;
+
       return null;
     }
+  }
 
-    final jsonStr = await file.readAsString();
-    return jsonDecode(jsonStr);
+  /// 自動 JSON 化（Map / List / toJson() 対応）
+  static dynamic _convertToJson(dynamic data) {
+    if (data == null) return null;
+
+    // Map の場合
+    if (data is Map) {
+      return data.map((key, value) => MapEntry(key, _convertToJson(value)));
+    }
+
+    // List の場合
+    if (data is List) {
+      return data.map((e) => _convertToJson(e)).toList();
+    }
+
+    // toJson() を持つオブジェクト
+    if (_hasToJson(data)) {
+      return _convertToJson(data.toJson());
+    }
+
+    // プリミティブ型（String, int, double, bool）
+    if (data is String ||
+        data is num ||
+        data is bool) {
+      return data;
+    }
+
+    throw Exception("SaveUtils: JSON に変換できない型です → ${data.runtimeType}");
+  }
+
+  /// toJson() を持っているかチェック
+  static bool _hasToJson(dynamic obj) {
+    try {
+      return obj.toJson is Function;
+    } catch (_) {
+      return false;
+    }
   }
 }

@@ -8,14 +8,12 @@ class MapRepositoryImpl implements MapRepository {
   MapRepositoryImpl(this.dataSource);
 
   @override
-  Future<void> saveLine(MapLine line) {
-    return dataSource.saveLine(line.points);
+  Future<void> saveLines(List<MapLine> lines) {
+    return dataSource.saveLines(lines);
   }
 
   @override
-  Future<MapLine?> loadLine() async {
-    final points = await dataSource.loadLine();
-    if (points == null) return null;
-    return MapLine(points: points);
+  Future<List<MapLine>> loadLines() {
+    return dataSource.loadLines();
   }
 }

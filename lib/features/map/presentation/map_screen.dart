@@ -8,6 +8,7 @@ import '../application/providers/map_providers.dart';
 import 'widgets/map_fab_buttons.dart';
 import 'widgets/crosshair_painter.dart';
 import 'widgets/mode_select_window.dart';
+import 'widgets/line/editor_window_switcher.dart';
 import 'widgets/coordinate_display.dart';
 
 class MapScreen extends ConsumerWidget {
@@ -21,12 +22,11 @@ class MapScreen extends ConsumerWidget {
     final mapController = MapController();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("ローカルタイルマップ"),
-      ),
+      // appBar: AppBar(
+      //   title: const Text("ローカルタイルマップ"),
+      // ),
       body: Stack(
         children: [
-          // --- 地図本体 ---
           FlutterMap(
             mapController: mapController,
             options: MapOptions(
@@ -36,7 +36,7 @@ class MapScreen extends ConsumerWidget {
               minZoom: 3,
               onTap: (tapPos, latlng) {
                 if (mapState.isLineMode) {
-                  mapCtrl.addLinePoint(latlng);
+                  mapCtrl.addPoint(latlng);
                 }
               },
               onPositionChanged: (pos, _) {
@@ -51,33 +51,57 @@ class MapScreen extends ConsumerWidget {
               ),
               PolylineLayer(
                 polylines: [
-                  Polyline(
-                    points: mapState.linePoints,
-                    strokeWidth: 4,
-                    color: Colors.blue,
-                  ),
+                  // ① 保存済みの MapLine をすべて描画
+                  for (final line in mapState.savedLines)
+                    Polyline(
+                      points: line.attributes.expand((attr) => attr.points).toList(),
+                      strokeWidth: line.lineWidth,
+                      color: line.lineColor,
+                    ),
+
+                  // ② ラインファイル編集中（editingLine）の属性を描画
+                  if (mapState.editingLine != null)
+                    for (final attr in mapState.editingLine!.attributes)
+                      Polyline(
+                        points: attr.points,
+                        strokeWidth: mapState.editingLine!.lineWidth,
+                        color: mapState.editingLine!.lineColor.withOpacity(0.7),
+                      ),
+
+                  // ③ 属性編集中（editingAttribute）の points を描画
+                  if (mapState.editingAttribute != null)
+                    Polyline(
+                      points: mapState.editingAttribute!.points,
+                      strokeWidth: mapState.editingLine?.lineWidth ?? 4,
+                      color: (mapState.editingLine?.lineColor ?? Colors.blue)
+                          .withOpacity(0.9),
+                    ),
+
+                  // ④ currentPoints（モード中にマップタップで追加している点）
+                  if (mapState.currentPoints.isNotEmpty)
+                    Polyline(
+                      points: mapState.currentPoints,
+                      strokeWidth: 4,
+                      color: Colors.blue,
+                    ),
                 ],
               ),
             ],
           ),
 
-          // --- 画面中央の十字線 ---
           Center(
             child: IgnorePointer(
               child: CustomPaint(
-                size: Size(40, 40),
+                size: const Size(40, 40),
                 painter: CrosshairPainter(),
               ),
             ),
           ),
 
-          // --- 上部モード選択ウィンドウ ---
           const ModeSelectWindow(),
-
-          // --- 座標表示 ---
+          const EditorWindowSwitcher(),
           const CoordinateDisplay(),
 
-          // --- 右下の FAB ボタン群 ---
           SafeArea(
             child: Align(
               alignment: Alignment.bottomRight,
