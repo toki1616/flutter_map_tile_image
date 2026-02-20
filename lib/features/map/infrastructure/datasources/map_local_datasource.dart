@@ -1,5 +1,6 @@
 import 'package:latlong2/latlong.dart';
-import 'package:map_tile_image/features/save/json_save/infrastructure/datasources/json_save_utils.dart';
+
+import '../../../../features/save/json_save/infrastructure/datasources/json_save_utils.dart';
 
 import '../../domain/entities/map_line.dart';
 
