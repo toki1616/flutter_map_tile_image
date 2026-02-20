@@ -23,7 +23,7 @@ class LineFileEditorWindow extends ConsumerWidget {
       top: 80,
       left: 20,
       width: 320,
-      height: 480,
+      height: 460,
       child: Material(
         elevation: 8,
         borderRadius: BorderRadius.circular(12),
@@ -115,48 +115,64 @@ class LineFileEditorWindow extends ConsumerWidget {
 
               const Text("ライン一覧"),
 
-              ReusableListView(
-                itemCount: editingLine.attributes.length,
-                itemBuilder: (context, index) {
-                  final attr = editingLine.attributes[index];
-                  return ListTile(
-                    title: Text(attr.title),
-                    selected: selected == index,
-                    onTap: () => mapCtrl.selectAttribute(index),
-                  );
-                },
-              ),
+              SizedBox(
+                height: 165,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 左側：リスト
+                    Expanded(
+                      child: ReusableListView(
+                        itemCount: editingLine.attributes.length,
+                        itemBuilder: (context, index) {
+                          final attr = editingLine.attributes[index];
+                          return ListTile(
+                            title: Text(attr.title),
+                            selected: selected == index,
+                            onTap: () => mapCtrl.selectAttribute(index),
+                          );
+                        },
+                      ),
+                    ),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      mapCtrl.startNewAttribute();
-                      editorCtrl.state =
-                          EditorWindowType.lineAttributeEditor;
-                    },
-                    child: const Text("ライン追加"),
-                  ),
-                  ElevatedButton(
-                    onPressed: selected == null
-                        ? null
-                        : () {
-                      mapCtrl.startEditingAttribute(selected);
-                      editorCtrl.state =
-                          EditorWindowType.lineAttributeEditor;
-                    },
-                    child: const Text("ライン編集"),
-                  ),
-                  ElevatedButton(
-                    onPressed: selected == null
-                        ? null
-                        : () {
-                      mapCtrl.deleteAttribute(selected);
-                    },
-                    child: const Text("ライン削除"),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+
+                    // 右側：縦ボタン
+                    SizedBox(
+                      width: 80,
+                      child: Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              mapCtrl.startNewAttribute();
+                              editorCtrl.state = EditorWindowType.lineAttributeEditor;
+                            },
+                            child: const Text("追加"),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: selected == null
+                                ? null
+                                : () {
+                              mapCtrl.startEditingAttribute(selected);
+                              editorCtrl.state = EditorWindowType.lineAttributeEditor;
+                            },
+                            child: const Text("編集"),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: selected == null
+                                ? null
+                                : () {
+                              mapCtrl.deleteAttribute(selected);
+                            },
+                            child: const Text("削除"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 12),
