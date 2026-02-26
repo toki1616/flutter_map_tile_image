@@ -92,33 +92,13 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
   assets:
-    - assets/images/tiles/6/54/22.png
-    - assets/images/tiles/6/54/23.png
-    - assets/images/tiles/6/54/24.png
-    - assets/images/tiles/6/54/25.png
-    - assets/images/tiles/6/54/26.png
-    - assets/images/tiles/6/54/27.png
-    - assets/images/tiles/6/55/22.png
-    - assets/images/tiles/6/55/23.png
-    - assets/images/tiles/6/55/24.png
-    - assets/images/tiles/6/55/25.png
-    - assets/images/tiles/6/55/26.png
-    - assets/images/tiles/6/55/27.png
-    - assets/images/tiles/6/56/22.png
-    - assets/images/tiles/6/56/23.png
-    - assets/images/tiles/6/56/24.png
-    - assets/images/tiles/6/56/25.png
-    - assets/images/tiles/6/56/26.png
-    - assets/images/tiles/6/56/27.png
-    - assets/images/tiles/6/57/22.png
-    - assets/images/tiles/6/57/23.png
-    - assets/images/tiles/6/57/24.png
-    - assets/images/tiles/6/57/25.png
-    - assets/images/tiles/6/57/26.png
-    - assets/images/tiles/6/57/27.png
-    - assets/images/tiles/6/58/22.png
-    - assets/images/tiles/6/58/23.png
-    - assets/images/tiles/6/58/24.png
-    - assets/images/tiles/6/58/25.png
-    - assets/images/tiles/6/58/26.png
-    - assets/images/tiles/6/58/27.png
+    - assets/images/tiles/4/13/ #
+    - assets/images/tiles/4/14/
+    - assets/images/tiles/5/27/ #
+    - assets/images/tiles/5/28/
+    - assets/images/tiles/5/29/
+    - assets/images/tiles/6/54/ #
+    - assets/images/tiles/6/55/
+    - assets/images/tiles/6/56/
+    - assets/images/tiles/6/57/
+    - assets/images/tiles/6/58/
