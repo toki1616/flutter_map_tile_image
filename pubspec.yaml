@@ -35,6 +35,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  flutter_map: ^6.0.0
+  latlong2: ^0.9.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -87,3 +90,35 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  assets:
+    - assets/images/tiles/6/54/22.png
+    - assets/images/tiles/6/54/23.png
+    - assets/images/tiles/6/54/24.png
+    - assets/images/tiles/6/54/25.png
+    - assets/images/tiles/6/54/26.png
+    - assets/images/tiles/6/54/27.png
+    - assets/images/tiles/6/55/22.png
+    - assets/images/tiles/6/55/23.png
+    - assets/images/tiles/6/55/24.png
+    - assets/images/tiles/6/55/25.png
+    - assets/images/tiles/6/55/26.png
+    - assets/images/tiles/6/55/27.png
+    - assets/images/tiles/6/56/22.png
+    - assets/images/tiles/6/56/23.png
+    - assets/images/tiles/6/56/24.png
+    - assets/images/tiles/6/56/25.png
+    - assets/images/tiles/6/56/26.png
+    - assets/images/tiles/6/56/27.png
+    - assets/images/tiles/6/57/22.png
+    - assets/images/tiles/6/57/23.png
+    - assets/images/tiles/6/57/24.png
+    - assets/images/tiles/6/57/25.png
+    - assets/images/tiles/6/57/26.png
+    - assets/images/tiles/6/57/27.png
+    - assets/images/tiles/6/58/22.png
+    - assets/images/tiles/6/58/23.png
+    - assets/images/tiles/6/58/24.png
+    - assets/images/tiles/6/58/25.png
+    - assets/images/tiles/6/58/26.png
+    - assets/images/tiles/6/58/27.png
