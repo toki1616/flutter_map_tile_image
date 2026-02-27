@@ -21,6 +21,8 @@ class MapScreen extends ConsumerWidget {
 
     final mapController = MapController();
 
+    final tileDir = ref.watch(tileDirectoryProvider);
+
     return Scaffold(
       // appBar: AppBar(
       //   title: const Text("ローカルタイルマップ"),
@@ -46,8 +48,12 @@ class MapScreen extends ConsumerWidget {
             ),
             children: [
               TileLayer(
-                tileProvider: AssetTileProvider(),
-                urlTemplate: "assets/images/tiles/{z}/{x}/{y}.png",
+                tileProvider: tileDir == null
+                ? AssetTileProvider()
+                      : FileTileProvider(),
+              urlTemplate: tileDir == null
+              ? ""
+                  : "$tileDir/{z}/{x}/{y}.png",
               ),
               PolylineLayer(
                 polylines: [

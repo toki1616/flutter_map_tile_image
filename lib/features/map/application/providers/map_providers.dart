@@ -58,3 +58,5 @@ StateNotifierProvider<MapController, MapState>((ref) {
     repository: ref.read(mapRepositoryProvider),
   );
 });
+
+final tileDirectoryProvider = StateProvider<String?>((ref) => null);
