@@ -4,10 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../application/providers/map_camera_provider.dart';
+import '../application/providers/map_point_provider.dart';
+import '../application/providers/mode_window_provider.dart';
 
 import 'widgets/center_crosshair.dart';
 import 'widgets/coordinate_display.dart';
 import 'widgets/map_fab_buttons.dart';
+import 'widgets/point/map_point_editor_window.dart';
+import 'widgets/point/map_point_list_window.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -28,6 +32,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final cameraState = ref.watch(mapCameraProvider);
+    final pointState = ref.watch(mapPointProvider);
+    final editorMode = ref.watch(modeWindowProvider);
 
     // アプリケーション層の状態が外部から変わったらマップカメラを同期する
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -76,6 +82,54 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 tileProvider: AssetTileProvider(),
                 urlTemplate: "assets/images/tiles/{z}/{x}/{y}.png",
               ),
+
+              /// ------------------------------------------------------------
+              /// 登録されたポイント(ピン)の描画
+              /// ------------------------------------------------------------
+              MarkerLayer(
+                markers: [
+                  // 既存の保存済みポイント（インデックスが必要なため asMap().entries を使用）
+                  ...pointState.savedPoints.asMap().entries
+                      .where((entry) => entry.value.isVisible) // 非表示のものは除外
+                      .map((entry) {
+                    final index = entry.key;
+                    final point = entry.value;
+
+                    final isEditingThis = pointState.editingPointIndex == index;
+                    final displayPoint = isEditingThis ? pointState.editingPoint! : point;
+
+                    return Marker(
+                      point: LatLng(displayPoint.latitude, displayPoint.longitude),
+                      width: 40,
+                      height: 40,
+                      child: GestureDetector(
+                        onTap: () {
+                          if (!isEditingThis) {
+                            ref.read(mapPointProvider.notifier).startEditPoint(index);
+                          }
+                        },
+                        child: Icon(
+                          Icons.location_on,
+                          color: isEditingThis ? Colors.blue : Colors.red,
+                          size: 40,
+                        ),
+                      ),
+                    );
+                  }), // toList() はスプレッド演算子(...)が展開してくれるので不要です
+
+                  // 新規作成中のポイント（リストにまだ無いもの）
+                  if (pointState.editingPoint != null && pointState.editingPointIndex == null)
+                    Marker(
+                      point: LatLng(
+                          pointState.editingPoint!.latitude,
+                          pointState.editingPoint!.longitude
+                      ),
+                      width: 40,
+                      height: 40,
+                      child: const Icon(Icons.location_on, color: Colors.blue, size: 40),
+                    ),
+                ],
+              ),
             ],
           ),
 
@@ -86,6 +140,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           CoordinateDisplay(
             centerCoordinate: LatLng(cameraState.centerLat, cameraState.centerLng),
           ),
+
+          // 左上の入力ウィンドウ
+          if (editorMode == MapEditorMode.pointFileList)
+            const MapPointListWindow(),
+          if (editorMode == MapEditorMode.pointEditor)
+            const MapPointEditorWindow(),
 
           // 右下配置のFAB操作層
           Positioned(

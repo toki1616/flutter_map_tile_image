@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// マップのフローティングアクションボタン一式
-class MapFabButtons extends StatelessWidget {
+import '../../application/providers/map_point_provider.dart';
+import '../../application/providers/mode_window_provider.dart';
+
+class MapFabButtons extends ConsumerWidget {
   final VoidCallback onZoomIn;
   final VoidCallback onZoomOut;
 
@@ -12,32 +15,48 @@ class MapFabButtons extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Align(
-        alignment: Alignment.bottomRight,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 16, bottom: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // ズームインボタン
-              FloatingActionButton(
-                heroTag: 'zoom_in_btn',
-                onPressed: onZoomIn, // 親から渡された関数を実行
-                child: const Icon(Icons.add),
-              ),
-              const SizedBox(height: 10),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final editorMode = ref.watch(modeWindowProvider);
+    final isPointSelected = editorMode == MapEditorMode.pointEditor;
 
-              // ズームアウトボタン
-              FloatingActionButton(
-                heroTag: 'zoom_out_btn',
-                onPressed: onZoomOut, // 親から渡された関数を実行
-                child: const Icon(Icons.remove),
-              ),
-            ],
-          ),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton(
+              heroTag: "btn_zoom_in",
+              onPressed: onZoomIn,
+              child: const Icon(Icons.add),
+            ),
+            const SizedBox(height: 12),
+            FloatingActionButton(
+              heroTag: "btn_zoom_out",
+              onPressed: onZoomOut,
+              child: const Icon(Icons.remove),
+            ),
+            const SizedBox(height: 12),
+            FloatingActionButton(
+              heroTag: "btn_add_point",
+              // 選択中（ON）はColors.redAccent、通常時（OFF）は他のボタンと同じ（nullでデフォルト色）
+              backgroundColor: isPointSelected ? Colors.blue : null,
+              foregroundColor: isPointSelected ? Colors.white : null,
+              // 抜粋
+              onPressed: () {
+                final currentMode = ref.read(modeWindowProvider);
+                if (currentMode == MapEditorMode.pointFileList || currentMode == MapEditorMode.pointEditor) {
+                  // 既にポイント関連が開いていれば閉じる（トグル）
+                  ref.read(modeWindowProvider.notifier).state = MapEditorMode.none;
+                  ref.read(mapPointProvider.notifier).cancelEditing();
+                } else {
+                  // 開いていなければ「一覧」を開く
+                  ref.read(modeWindowProvider.notifier).state = MapEditorMode.pointFileList;
+                }
+              },
+              child: const Icon(Icons.add_location_alt),
+            ),
+          ],
         ),
       ),
     );
